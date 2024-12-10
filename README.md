@@ -35,6 +35,7 @@ GOOGLE_API_KEY="YOUR_API_KEY_HERE"
 ## How to Run the Application
 
 1. Make sure you're in the project's root directory.
+
 2. Start the Streamlit app using the following command:
    ```bash
    python -m streamlit run app.py
@@ -46,5 +47,7 @@ GOOGLE_API_KEY="YOUR_API_KEY_HERE"
 ## Time to Cook 
 
    1. Upload a PDF or multiple PDFs.
+
    2. Query whatever you want.
+      
    3. Check if the response is correct. If it's correct, get me a brownie; if it's wrong, give suggestions to Google.

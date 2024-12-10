@@ -4,7 +4,7 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 import os
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 import google.generativeai as genai
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
@@ -29,8 +29,19 @@ def get_text_chunks(text):
     return chunks
 
 def get_vector_store(text_chunks):
+    print(f"text_chunks: {text_chunks}")  # Debugging line to check if chunks are generated
+
+    if not text_chunks:
+        raise ValueError("No text chunks were generated. Check PDF extraction and chunking.")
+
     embedding_function = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-    # embedding_function = GoogleGenerativeAIEmbeddings(model="gemini-1.5-pro")
+    embeddings = embedding_function.embed_documents(text_chunks)
+    
+    print(f"Embeddings: {embeddings}")  # Debugging line to check embeddings
+
+    if not embeddings or not isinstance(embeddings[0], list) or len(embeddings[0]) == 0:
+        raise ValueError("Invalid embeddings. Ensure the embedding function is returning valid, non-empty embeddings.")
+
     vector_store = FAISS.from_texts(text_chunks, embedding=embedding_function)
     vector_store.save_local("faiss_index")
 
@@ -50,7 +61,7 @@ def get_conversational_chain():
 
 def user_input(user_question):
     embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-    new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization = True)
+    new_db = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
     docs = new_db.similarity_search(user_question)
     chain = get_conversational_chain()
     response = chain({"input_documents": docs, "question": user_question}, return_only_outputs=True)
